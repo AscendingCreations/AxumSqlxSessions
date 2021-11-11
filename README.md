@@ -1,12 +1,11 @@
-# AxumSqlxSessions
+# Axum_Sqlx_Sessions
 
 Library to Provide a Postgresql Session management layer. You must also include Tower_cookies in order to use this Library.
 
-[![https://crates.io/crates/axumsqlxsessions](https://img.shields.io/badge/crates.io-v0.1.0-blue)](https://crates.io/crates/axumsqlxsessions)
-[![Docs](https://docs.rs/axumsqlxsessions/badge.svg)](https://docs.rs/axumsqlxsessions)
+[![https://crates.io/crates/axum_sqlx_sessions](https://img.shields.io/badge/crates.io-v0.1.0-blue)](https://crates.io/crates/axum_sqlx_sessions)
+[![Docs](https://docs.rs/axum_sqlx_sessions/badge.svg)](https://docs.rs/axum_sqlx_sessions)
 
 # Example
-
 
 ```
 pub fn init_pool(config: &ServerConfig) -> anyhow::Result<sqlx::Pool<sqlx::Postgres>> {

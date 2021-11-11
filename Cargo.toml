@@ -1,12 +1,12 @@
 [package]
-name = "axumsqlxsessions"
+name = "axum_sqlx_sessions"
 version = "0.1.0"
 authors = ["Andrew Wheeler <genusistimelord@gmail.com>"]
 description = "Library to Provide a Postgresql Session management layer. You must also include Tower_cookies in order to use this Library."
 edition = "2021"
 license = "MIT"
 readme = "README.md"
-documentation = "https://docs.rs/axumsqlxsessions"
+documentation = "https://docs.rs/axum_sqlx_sessions"
 keywords = ["Axum", "Tower", "SQLx", "Session"]
 
 [dependencies]
