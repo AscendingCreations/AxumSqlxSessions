@@ -1,5 +1,6 @@
 use chrono::Duration;
 
+///This is the Sessions Config it is used to Setup the SQL database and sets the hashmap saved Memory and Session life spans.
 #[derive(Debug, Clone)]
 pub struct SqlxSessionConfig {
     /// Sessions lifespan

@@ -1,4 +1,5 @@
 use crate::SQLxSession;
+use futures::executor::block_on;
 use futures_util::ready;
 use http::Response;
 use pin_project_lite::pin_project;
@@ -7,8 +8,9 @@ use std::{
     pin::Pin,
     task::{Context, Poll},
 };
-use tower_cookies::{Cookie, Cookies};
 
+// This is a Future which is Ran at the end of a Route to Process whats left over
+// or add cookies ETC to the Headers or Update HTML.
 pin_project! {
     /// Response future for [`SessionManager`].
     #[derive(Debug)]
@@ -19,6 +21,8 @@ pin_project! {
     }
 }
 
+/// This Portion runs when the Route has finished running.
+/// It can not See any Extensions for some reason...
 impl<F, ResBody, E> Future for ResponseFuture<F>
 where
     F: Future<Output = Result<Response<ResBody>, E>>,
@@ -27,23 +31,14 @@ where
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = self.project();
-        let mut res = ready!(this.future.poll(cx)?);
+        let res = ready!(this.future.poll(cx)?);
 
-        let cookies = res
-            .extensions_mut()
-            .get::<Cookies>()
-            .expect("Tower_cookies extension layer missing");
-
-        if cookies
-            .get(&this.session.store().config.cookie_name[..])
-            .is_none()
-        {
-            let cookie = Cookie::new(
-                this.session.store().config.cookie_name.clone(),
-                this.session.id().0.to_string(),
-            );
-
-            cookies.add(cookie);
+        //Check to get the Session itself so it can be Saved to the Database on Response
+        //TODO: Find a more Finite way to do this so server is less bogged down?
+        let store_ug = this.session.store.inner.upgradable_read();
+        if let Some(sess) = store_ug.get(&this.session.id.0.to_string()) {
+            let inner = sess.lock();
+            let _ = block_on(this.session.store.store_session(inner.clone()));
         }
 
         Poll::Ready(Ok(res))

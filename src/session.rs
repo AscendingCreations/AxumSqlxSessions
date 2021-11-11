@@ -8,12 +8,16 @@ use futures::executor::block_on;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
+///This is the Session that is generated when a user is routed to a page that Needs one
+/// It is used to Save and load session data similar to how it is done on python.
 #[derive(Debug, Clone)]
 pub struct SQLxSession {
     pub(crate) store: SQLxSessionStore,
     pub(crate) id: SQLxSessionID,
 }
 
+/// this auto pulls a SQLxSession from the extensions when added by the Session managers call
+/// if for some reason the Session Manager did not run this will Error.
 #[async_trait]
 impl<B> FromRequest<B> for SQLxSession
 where
@@ -34,6 +38,7 @@ where
 }
 
 impl SQLxSession {
+    ///Runs a Closure that can return Data from the users SessionData Hashmap.
     pub fn tap<T: DeserializeOwned>(
         &self,
         func: impl FnOnce(&mut SQLxSessionData) -> Option<T>,
@@ -48,6 +53,7 @@ impl SQLxSession {
         func(&mut instance)
     }
 
+    ///Sets the Entire Session to be Cleaned on next load.
     pub fn destroy(&self) {
         self.tap(|sess| {
             sess.destroy = true;
@@ -55,6 +61,7 @@ impl SQLxSession {
         });
     }
 
+    ///Used to get data stored within SessionDatas hashmap from a key value.
     pub fn get<T: serde::de::DeserializeOwned>(&self, key: &str) -> Option<T> {
         self.tap(|sess| {
             let string = sess.data.get(key)?;
@@ -62,6 +69,7 @@ impl SQLxSession {
         })
     }
 
+    /// Used to Set data to SessionData via a Key and the Value to Set.
     pub fn set(&self, key: &str, value: impl Serialize) {
         let value = serde_json::to_string(&value).unwrap_or_else(|_| "".to_string());
 
@@ -73,10 +81,12 @@ impl SQLxSession {
         });
     }
 
+    ///used to remove a key and its data from SessionData's Hashmap
     pub fn remove(&self, key: &str) {
         self.tap(|sess| sess.data.remove(key));
     }
 
+    /// Will instantly clear all data from SessionData's Hashmap
     pub fn clear_all(&self) {
         self.tap(|sess| {
             sess.data.clear();
@@ -85,15 +95,8 @@ impl SQLxSession {
         });
     }
 
+    /// Returns a Count of all Sessions currently within the Session Store.
     pub fn count(&self) -> i64 {
         block_on(self.store.count()).unwrap_or(0i64)
-    }
-
-    pub(crate) fn store(&self) -> &SQLxSessionStore {
-        &self.store
-    }
-
-    pub(crate) fn id(&self) -> &SQLxSessionID {
-        &self.id
     }
 }

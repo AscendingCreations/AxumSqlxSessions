@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
+///This Contains all of out Sessions Data including their Hashed Data they access.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SQLxSessionData {
     pub id: Uuid,

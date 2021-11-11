@@ -13,6 +13,8 @@ pub struct SQLxTimers {
     pub last_database_expiry_sweep: DateTime<Utc>,
 }
 
+/// This stores the Postgresql Pool and the Main timers and a hash table that stores the SessionData.
+/// It is also used to Initiate a Database Migrate, Cleanup, etc when used directly.
 #[derive(Clone, Debug)]
 pub struct SQLxSessionStore {
     //move to layer creation

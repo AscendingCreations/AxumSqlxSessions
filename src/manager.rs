@@ -10,6 +10,9 @@ use tower_cookies::{Cookie, Cookies};
 use tower_service::Service;
 use uuid::Uuid;
 
+///This manages the other services that can be seen in inner and gives access to the store.
+/// the store is cloneable hence per each SQLxSession we clone it as we use thread Read write locks
+/// to control any data that needs to be accessed across threads that cant be cloned.
 #[derive(Clone, Debug)]
 pub struct SQLxSessionManager<S> {
     inner: S,
@@ -31,13 +34,18 @@ where
     type Error = S::Error;
     type Future = ResponseFuture<S::Future>;
 
+    ///lets the system know it is ready for the next step
     #[inline]
     fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         self.inner.poll_ready(cx)
     }
 
+    /// Is called on Request to generate any needed data and sets a future to be used on the Response
+    /// This is where we will Generate the SQLxSession for the end user and where we add the Cookies.
+    //TODO: Make lifespan Adjustable to be Permenant, Per Session OR Based on a Set Duration from Config.
     fn call(&mut self, mut req: Request<ReqBody>) -> Self::Future {
         let store = self.store.clone();
+        // We Extract the Tower_Cookies Extensions Variable so we can add Cookies to it. Some reason can only be done here..?
         let cookies = req
             .extensions()
             .get::<Cookies>()
@@ -98,8 +106,10 @@ where
                             sess.autoremove = Utc::now() + store.config.memory_lifespan;
                         }
 
-                        let cookie =
+                        let mut cookie =
                             Cookie::new(store.config.cookie_name.clone(), id.0 .0.to_string());
+
+                        cookie.make_permanent();
 
                         cookies.add(cookie);
                         store_wg.insert(id.0 .0.to_string(), Mutex::new(sess));
@@ -133,8 +143,9 @@ where
                         }
                     }
 
-                    let cookie = Cookie::new(store.config.cookie_name.clone(), id.0 .0.to_string());
-
+                    let mut cookie =
+                        Cookie::new(store.config.cookie_name.clone(), id.0 .0.to_string());
+                    cookie.make_permanent();
                     cookies.add(cookie);
 
                     let sess = SQLxSessionData {
@@ -153,6 +164,7 @@ where
             store: store.clone(),
         };
 
+        //Sets a clone of the Store in the Extensions for Direct usage and sets the Session for Direct usage
         req.extensions_mut().insert(self.store.clone());
         req.extensions_mut().insert(session.clone());
 
