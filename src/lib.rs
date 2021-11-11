@@ -1,5 +1,6 @@
+#![doc = include_str!("../README.md")]
 //Todo: Support more databases and expand the Tokio/RLS or RustRLS Selections for SQLx
-
+///This Library Requires that Tower_Cookies is used as an active layer.
 mod config;
 mod future;
 mod layer;
