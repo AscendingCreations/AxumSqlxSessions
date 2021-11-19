@@ -7,7 +7,7 @@ Library to Provide a Postgresql Session management layer. You must also include 
 
 # Example
 
-```
+```rust
 pub fn init_pool(config: &ServerConfig) -> anyhow::Result<sqlx::Pool<sqlx::Postgres>> {
     let mut connect_opts = PgConnectOptions::new();
     connect_opts.log_statements(LevelFilter::Debug);
