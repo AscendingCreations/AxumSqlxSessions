@@ -1,6 +1,6 @@
 [package]
 name = "axum_sqlx_sessions"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Andrew Wheeler <genusistimelord@gmail.com>"]
 description = "Library to Provide a Postgresql Session management layer. You must also include Tower_cookies in order to use this Library."
 edition = "2021"
@@ -30,7 +30,7 @@ pin-project-lite = "0.2"
 tower-http = { version = "0.2", features = ["full"] }
 tower-layer = "0.3"
 tower-service = "0.3"
-tower-cookies = "0.3"
+tower-cookies = "0.4"
 sqlx = { version = "0.5", features = [
     "runtime-tokio-rustls",
     "postgres",

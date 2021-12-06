@@ -2,7 +2,7 @@
 
 Library to Provide a Postgresql Session management layer. You must also include Tower_cookies in order to use this Library.
 
-[![https://crates.io/crates/axum_sqlx_sessions](https://img.shields.io/badge/crates.io-v0.1.3-blue)](https://crates.io/crates/axum_sqlx_sessions)
+[![https://crates.io/crates/axum_sqlx_sessions](https://img.shields.io/badge/crates.io-v0.1.4-blue)](https://crates.io/crates/axum_sqlx_sessions)
 [![Docs](https://docs.rs/axum_sqlx_sessions/badge.svg)](https://docs.rs/axum_sqlx_sessions)
 
 # Example
