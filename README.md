@@ -1,8 +1,8 @@
 # Axum_Sqlx_Sessions
 
-Library to Provide a Postgresql Session management layer. You must also include Tower_cookies in order to use this Library.
-
-[![https://crates.io/crates/axum_sqlx_sessions](https://img.shields.io/badge/crates.io-v0.1.4-blue)](https://crates.io/crates/axum_sqlx_sessions)
+Library to Provide a Sqlx Database Session management layer. You must also include Tower_cookies in order to use this Library.
+library default is Postgresql
+[![https://crates.io/crates/axum_sqlx_sessions](https://img.shields.io/badge/crates.io-v0.2.0-blue)](https://crates.io/crates/axum_sqlx_sessions)
 [![Docs](https://docs.rs/axum_sqlx_sessions/badge.svg)](https://docs.rs/axum_sqlx_sessions)
 
 # Example
@@ -10,7 +10,7 @@ Library to Provide a Postgresql Session management layer. You must also include 
 ```rust
 use sqlx::{ConnectOptions, postgres::{PgPoolOptions, PgConnectOptions}};
 use std::net::SocketAddr;
-use axum_sqlx_sessions::{SQLxSession, SqlxSessionConfig, SqlxSessionLayer};
+use axum_sqlx_sessions::{postgres::{PostgresSession, PostgresSessionLayer}, SqlxSessionConfig};
 use axum::{
     Router,
     routing::get,
@@ -29,7 +29,7 @@ async fn main() {
     let app = Router::new()
         .route("/greet/:name", get(greet))
         .layer(tower_cookies::CookieManagerLayer::new())
-        .layer(SqlxSessionLayer::new(session_config, poll.clone()));
+        .layer(PostgresSessionLayer::new(session_config, poll.clone()));
 
     // run it
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
@@ -41,7 +41,7 @@ async fn main() {
     # };
 }
 
-async fn greet(session: SQLxSession) -> String {
+async fn greet(session: PostgresSession) -> String {
     let mut count: usize = session.get("count").unwrap_or(0);
     count += 1;
     session.set("count", count);

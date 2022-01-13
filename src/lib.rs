@@ -1,20 +1,33 @@
 #![doc = include_str!("../README.md")]
-//Todo: Support more databases and expand the Tokio/RLS or RustRLS Selections for SQLx
-///This Library Requires that Tower_Cookies is used as an active layer.
-mod config;
-mod future;
-mod layer;
-mod manager;
-mod session;
-mod session_data;
-mod session_id;
-mod session_store;
+#![allow(dead_code)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
-pub use config::SqlxSessionConfig;
-pub use future::ResponseFuture;
-pub use layer::SqlxSessionLayer;
-pub use manager::SQLxSessionManager;
-pub use session::SQLxSession;
-pub use session_data::SQLxSessionData;
-pub use session_id::SQLxSessionID;
-pub use session_store::SQLxSessionStore;
+///This Library Requires that Tower_Cookies is used as an active layer.
+
+#[cfg(feature = "postgres")]
+#[cfg_attr(docsrs, doc(cfg(feature = "postgres")))]
+mod postgres;
+
+#[cfg(feature = "mysql")]
+#[cfg_attr(docsrs, doc(cfg(feature = "mysql")))]
+mod mysql;
+
+#[cfg(feature = "sqlite")]
+#[cfg_attr(docsrs, doc(cfg(feature = "sqlite")))]
+mod sqlite;
+
+mod sessions;
+
+pub use sessions::SqlxSessionConfig;
+
+#[cfg(feature = "postgres")]
+#[cfg_attr(docsrs, doc(cfg(feature = "postgres")))]
+pub use postgres::{PostgresSession, PostgresSessionLayer};
+
+#[cfg(feature = "mysql")]
+#[cfg_attr(docsrs, doc(cfg(feature = "mysql")))]
+pub use mysql::{MysqlSession, MysqlSessionLayer};
+
+#[cfg(feature = "sqlite")]
+#[cfg_attr(docsrs, doc(cfg(feature = "sqlite")))]
+pub use sqlite::{SqliteSession, SqliteSessionLayer};
