@@ -2,6 +2,7 @@
 
 Library to Provide a Sqlx Database Session management layer. You must also include Tower_cookies in order to use this Library.
 library default is Postgresql
+
 [![https://crates.io/crates/axum_sqlx_sessions](https://img.shields.io/badge/crates.io-v0.2.0-blue)](https://crates.io/crates/axum_sqlx_sessions)
 [![Docs](https://docs.rs/axum_sqlx_sessions/badge.svg)](https://docs.rs/axum_sqlx_sessions)
 
