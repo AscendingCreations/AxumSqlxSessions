@@ -40,13 +40,18 @@ impl MysqlSessionStore {
 
     pub async fn migrate(&self) -> sqlx::Result<()> {
         let mut conn = self.client.acquire().await?;
+        //Must use utf8mb4 to support all unicode characters or people will have major issues.
         sqlx::query(&*self.substitute_table_name(
             r#"
             CREATE TABLE IF NOT EXISTS %%TABLE_NAME%% (
-                "id" VARCHAR NOT NULL PRIMARY KEY,
-                "expires" TIMESTAMP WITH TIME ZONE NULL,
-                "session" TEXT NOT NULL
+                `id` VARCHAR(128) NOT NULL,
+                `expires` TIMESTAMP(6) NULL,
+                `session` TEXT NOT NULL,
+                PRIMARY KEY (`id`),
+                KEY `expires` (`expires`)
             )
+            ENGINE=InnoDB
+            DEFAULT CHARSET=utf8mb4
             "#,
         ))
         .execute(&mut conn)
@@ -61,7 +66,7 @@ impl MysqlSessionStore {
 
     pub async fn cleanup(&self) -> sqlx::Result<()> {
         let mut connection = self.client.acquire().await?;
-        sqlx::query(&self.substitute_table_name("DELETE FROM %%TABLE_NAME%% WHERE expires < $1"))
+        sqlx::query(&self.substitute_table_name("DELETE FROM %%TABLE_NAME%% WHERE expires < ?"))
             .bind(Utc::now())
             .execute(&mut connection)
             .await?;
@@ -82,7 +87,7 @@ impl MysqlSessionStore {
         let mut connection = self.client.acquire().await?;
 
         let result: Option<(String,)> = sqlx::query_as(&self.substitute_table_name(
-            "SELECT session FROM %%TABLE_NAME%% WHERE id = $1 AND (expires IS NULL OR expires > $2)"
+            "SELECT session FROM %%TABLE_NAME%% WHERE id = ? AND (expires IS NULL OR expires > ?)",
         ))
         .bind(&cookie_value)
         .bind(Utc::now())
@@ -101,10 +106,10 @@ impl MysqlSessionStore {
         sqlx::query(&self.substitute_table_name(
             r#"
             INSERT INTO %%TABLE_NAME%%
-              (id, session, expires) SELECT $1, $2, $3
-            ON CONFLICT(id) DO UPDATE SET
-              expires = EXCLUDED.expires,
-              session = EXCLUDED.session
+              (id, session, expires) VALUES(?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+              expires = VALUES(expires),
+              session = VALUES(session)
             "#,
         ))
         .bind(session.id)
@@ -118,7 +123,7 @@ impl MysqlSessionStore {
 
     pub async fn destroy_session(&self, id: &str) -> Result {
         let mut connection = self.client.acquire().await?;
-        sqlx::query(&self.substitute_table_name("DELETE FROM %%TABLE_NAME%% WHERE id = $1"))
+        sqlx::query(&self.substitute_table_name("DELETE FROM %%TABLE_NAME%% WHERE id = ?"))
             .bind(&id)
             .execute(&mut connection)
             .await?;
