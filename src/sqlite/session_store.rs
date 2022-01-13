@@ -43,9 +43,9 @@ impl SqliteSessionStore {
         sqlx::query(&*self.substitute_table_name(
             r#"
             CREATE TABLE IF NOT EXISTS %%TABLE_NAME%% (
-                "id" VARCHAR NOT NULL PRIMARY KEY,
-                "expires" TIMESTAMP WITH TIME ZONE NULL,
-                "session" TEXT NOT NULL
+                id TEXT PRIMARY KEY NOT NULL,
+                expires INTEGER NULL,
+                session TEXT NOT NULL
             )
             "#,
         ))
@@ -61,8 +61,8 @@ impl SqliteSessionStore {
 
     pub async fn cleanup(&self) -> sqlx::Result<()> {
         let mut connection = self.client.acquire().await?;
-        sqlx::query(&self.substitute_table_name("DELETE FROM %%TABLE_NAME%% WHERE expires < $1"))
-            .bind(Utc::now())
+        sqlx::query(&self.substitute_table_name("DELETE FROM %%TABLE_NAME%% WHERE expires < ?"))
+            .bind(Utc::now().timestamp())
             .execute(&mut connection)
             .await?;
 
@@ -82,10 +82,10 @@ impl SqliteSessionStore {
         let mut connection = self.client.acquire().await?;
 
         let result: Option<(String,)> = sqlx::query_as(&self.substitute_table_name(
-            "SELECT session FROM %%TABLE_NAME%% WHERE id = $1 AND (expires IS NULL OR expires > $2)"
+            "SELECT session FROM %%TABLE_NAME%% WHERE id = ? AND (expires IS NULL OR expires > ?)",
         ))
         .bind(&cookie_value)
-        .bind(Utc::now())
+        .bind(Utc::now().timestamp())
         .fetch_optional(&mut connection)
         .await?;
 
@@ -101,15 +101,15 @@ impl SqliteSessionStore {
         sqlx::query(&self.substitute_table_name(
             r#"
             INSERT INTO %%TABLE_NAME%%
-              (id, session, expires) SELECT $1, $2, $3
+              (id, session, expires) VALUES (?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
-              expires = EXCLUDED.expires,
-              session = EXCLUDED.session
+              expires = excluded.expires,
+              session = excluded.session
             "#,
         ))
         .bind(session.id)
         .bind(&string)
-        .bind(&session.expires)
+        .bind(&session.expires.timestamp())
         .execute(&mut connection)
         .await?;
 
@@ -118,7 +118,7 @@ impl SqliteSessionStore {
 
     pub async fn destroy_session(&self, id: &str) -> Result {
         let mut connection = self.client.acquire().await?;
-        sqlx::query(&self.substitute_table_name("DELETE FROM %%TABLE_NAME%% WHERE id = $1"))
+        sqlx::query(&self.substitute_table_name("DELETE FROM %%TABLE_NAME%% WHERE id = ?"))
             .bind(&id)
             .execute(&mut connection)
             .await?;
@@ -128,7 +128,7 @@ impl SqliteSessionStore {
 
     pub async fn clear_store(&self) -> Result {
         let mut connection = self.client.acquire().await?;
-        sqlx::query(&self.substitute_table_name("TRUNCATE %%TABLE_NAME%%"))
+        sqlx::query(&self.substitute_table_name("DELETE FROM %%TABLE_NAME%%"))
             .execute(&mut connection)
             .await?;
 
