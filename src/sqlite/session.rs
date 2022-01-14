@@ -1,6 +1,6 @@
 use crate::{
+    sessions::{SessionBind, SqlxSessionData, SqlxSessionID},
     sqlite::SqliteSessionStore,
-    sessions::{SqlxSessionData, SqlxSessionID},
 };
 use axum::{
     async_trait,
@@ -17,6 +17,12 @@ use serde::Serialize;
 pub struct SqliteSession {
     pub(crate) store: SqliteSessionStore,
     pub(crate) id: SqlxSessionID,
+}
+
+impl SessionBind for SqliteSession {
+    fn empty() {
+        unimplemented!()
+    }
 }
 
 /// this auto pulls a SqlxSession from the extensions when added by the Session managers call

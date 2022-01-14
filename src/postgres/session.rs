@@ -1,6 +1,6 @@
 use crate::{
     postgres::PostgresSessionStore,
-    sessions::{SqlxSessionData, SqlxSessionID},
+    sessions::{SessionBind, SqlxSessionData, SqlxSessionID},
 };
 use axum::{
     async_trait,
@@ -17,6 +17,12 @@ use serde::Serialize;
 pub struct PostgresSession {
     pub(crate) store: PostgresSessionStore,
     pub(crate) id: SqlxSessionID,
+}
+
+impl SessionBind for PostgresSession {
+    fn empty() {
+        unimplemented!()
+    }
 }
 
 /// this auto pulls a SqlxSession from the extensions when added by the Session managers call

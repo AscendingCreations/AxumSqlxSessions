@@ -1,6 +1,6 @@
 use crate::{
     mysql::MysqlSessionStore,
-    sessions::{SqlxSessionData, SqlxSessionID},
+    sessions::{SessionBind, SqlxSessionData, SqlxSessionID},
 };
 use axum::{
     async_trait,
@@ -17,6 +17,12 @@ use serde::Serialize;
 pub struct MysqlSession {
     pub(crate) store: MysqlSessionStore,
     pub(crate) id: SqlxSessionID,
+}
+
+impl SessionBind for MysqlSession {
+    fn empty() {
+        unimplemented!()
+    }
 }
 
 /// this auto pulls a SqlxSession from the extensions when added by the Session managers call
