@@ -18,7 +18,7 @@ mod sqlite;
 
 mod sessions;
 
-pub use sessions::SqlxSessionConfig;
+pub use sessions::{SessionBind, SqlxSessionConfig};
 
 #[cfg(feature = "postgres")]
 #[cfg_attr(docsrs, doc(cfg(feature = "postgres")))]
