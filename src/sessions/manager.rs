@@ -1,6 +1,5 @@
-use crate::{
-    mysql::{MysqlResponseFuture, MysqlSession, MysqlSessionStore},
-    sessions::{SqlxSessionData, SqlxSessionID},
+use crate::sessions::{
+    SqlxResponseFuture, SqlxSession, SqlxSessionData, SqlxSessionID, SqlxSessionStore,
 };
 use chrono::{Duration, Utc};
 use futures::executor::block_on;
@@ -16,25 +15,25 @@ use uuid::Uuid;
 /// the store is cloneable hence per each SqlxSession we clone it as we use thread Read write locks
 /// to control any data that needs to be accessed across threads that cant be cloned.
 #[derive(Clone, Debug)]
-pub struct MysqlSessionManager<S> {
+pub struct SqlxSessionManager<S> {
     inner: S,
-    store: MysqlSessionStore,
+    store: SqlxSessionStore,
 }
 
-impl<S> MysqlSessionManager<S> {
+impl<S> SqlxSessionManager<S> {
     /// Create a new cookie manager.
-    pub fn new(inner: S, store: MysqlSessionStore) -> Self {
+    pub fn new(inner: S, store: SqlxSessionStore) -> Self {
         Self { inner, store }
     }
 }
 
-impl<ReqBody, ResBody, S> Service<Request<ReqBody>> for MysqlSessionManager<S>
+impl<ReqBody, ResBody, S> Service<Request<ReqBody>> for SqlxSessionManager<S>
 where
     S: Service<Request<ReqBody>, Response = Response<ResBody>>,
 {
     type Response = S::Response;
     type Error = S::Error;
-    type Future = MysqlResponseFuture<S::Future>;
+    type Future = SqlxResponseFuture<S::Future>;
 
     ///lets the system know it is ready for the next step
     #[inline]
@@ -53,7 +52,7 @@ where
             .get::<Cookies>()
             .expect("`Tower_Cookie` extension missing");
 
-        let session = MysqlSession {
+        let session = SqlxSession {
             id: {
                 let store_ug = store.inner.upgradable_read();
 
@@ -170,7 +169,7 @@ where
         req.extensions_mut().insert(self.store.clone());
         req.extensions_mut().insert(session.clone());
 
-        MysqlResponseFuture {
+        SqlxResponseFuture {
             future: self.inner.call(req),
             session,
         }

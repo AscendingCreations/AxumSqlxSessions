@@ -29,11 +29,9 @@ tokio = { version = "1", features = ["full"] }
 futures = "0.3"
 async-trait = "0.1.51"
 tracing = "0.1"
-thiserror = "1.0.29"
 http-body = "0.4"
 uuid = { version = "0.8", features = ["v4", "serde"] }
 rand = "0.8"
-futures-util = "0.3"
 http = "0.2"
 parking_lot = "0.11"
 pin-project-lite = "0.2"
@@ -45,6 +43,21 @@ sqlx = { version = "0.5", features = [
     "runtime-tokio-rustls",
     "chrono",
     "json",
+    "any",
     "all-types",
 ] }
-anyhow = "1.0"
+thiserror = "1.0"
+either = "1.6.1"
+futures-channel = { version = "0.3.19", default-features = false, features = [
+    "sink",
+    "alloc",
+    "std",
+] }
+futures-core = { version = "0.3.19", default-features = false }
+futures-intrusive = "0.4.0"
+futures-util = { version = "0.3", default-features = false, features = [
+    "alloc",
+    "sink",
+] }
+# used by the SQLite worker thread to block on the async mutex that locks the database handle
+futures-executor = { version = "0.3.19", optional = true }

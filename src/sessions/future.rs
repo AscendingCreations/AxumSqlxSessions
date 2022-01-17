@@ -1,4 +1,4 @@
-use crate::postgres::PostgresSession;
+use crate::sessions::SqlxSession;
 use futures::executor::block_on;
 use futures_util::ready;
 use http::Response;
@@ -14,16 +14,16 @@ use std::{
 pin_project! {
     /// Response future for [`SessionManager`].
     #[derive(Debug)]
-    pub struct PostgresResponseFuture<F> {
+    pub struct SqlxResponseFuture<F> {
         #[pin]
         pub(crate) future: F,
-        pub(crate) session: PostgresSession,
+        pub(crate) session: SqlxSession,
     }
 }
 
 /// This Portion runs when the Route has finished running.
 /// It can not See any Extensions for some reason...
-impl<F, ResBody, E> Future for PostgresResponseFuture<F>
+impl<F, ResBody, E> Future for SqlxResponseFuture<F>
 where
     F: Future<Output = Result<Response<ResBody>, E>>,
 {
