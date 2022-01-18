@@ -1,5 +1,5 @@
 mod connections;
-mod databases;
+mod database;
 
 pub use connections::SqlxDatabaseConnection;
-pub use databases::SqlxDatabasePool;
+pub use database::SqlxDatabasePool;

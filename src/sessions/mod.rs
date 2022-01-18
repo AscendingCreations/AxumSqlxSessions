@@ -1,4 +1,3 @@
-mod binding;
 mod config;
 mod errors;
 mod future;
@@ -10,7 +9,6 @@ mod session_id;
 mod session_store;
 mod session_timers;
 
-pub use binding::SessionBind;
 pub use config::SqlxSessionConfig;
 pub use errors::SessionError;
 pub use future::SqlxResponseFuture;

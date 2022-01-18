@@ -11,7 +11,7 @@ library default is Postgresql
 ```rust
 use sqlx::{ConnectOptions, postgres::{PgPoolOptions, PgConnectOptions}};
 use std::net::SocketAddr;
-use axum_sqlx_sessions::{postgres::{SqlxSession, SqlxSessionLayer}, SqlxSessionConfig};
+use axum_sqlx_sessions::{SqlxSession, SqlxSessionLayer, SqlxSessionConfig, SqlxDatabasePool};
 use axum::{
     Router,
     routing::get,
@@ -30,7 +30,7 @@ async fn main() {
     let app = Router::new()
         .route("/greet/:name", get(greet))
         .layer(tower_cookies::CookieManagerLayer::new())
-        .layer(SqlxSessionLayer::new(session_config, poll.clone()));
+        .layer(SqlxSessionLayer::new(session_config, SqlxDatabasePool::Postgres(poll.clone())));
 
     // run it
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));

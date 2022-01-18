@@ -11,7 +11,7 @@ pub struct SqlxSessionLayer {
 }
 
 impl SqlxSessionLayer {
-    /// Creates the Sqlx Postgres Session Layer.
+    /// Creates the Sqlx Session Layer.
     pub fn new(config: SqlxSessionConfig, poll: SqlxDatabasePool) -> Self {
         let store = SqlxSessionStore::new(poll, config);
         Self { store }
