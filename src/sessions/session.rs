@@ -39,7 +39,7 @@ where
 
 impl SqlxSession {
     ///Runs a Closure that can return Data from the users SessionData Hashmap.
-    fn tap<T: DeserializeOwned>(
+    pub fn tap<T: DeserializeOwned>(
         &self,
         func: impl FnOnce(&mut SqlxSessionData) -> Option<T>,
     ) -> Option<T> {
@@ -54,7 +54,7 @@ impl SqlxSession {
     }
 
     ///Sets the Entire Session to be Cleaned on next load.
-    fn destroy(&self) {
+    pub fn destroy(&self) {
         self.tap(|sess| {
             sess.destroy = true;
             Some(1)
@@ -62,7 +62,7 @@ impl SqlxSession {
     }
 
     ///Used to get data stored within SessionDatas hashmap from a key value.
-    fn get<T: serde::de::DeserializeOwned>(&self, key: &str) -> Option<T> {
+    pub fn get<T: serde::de::DeserializeOwned>(&self, key: &str) -> Option<T> {
         self.tap(|sess| {
             let string = sess.data.get(key)?;
             serde_json::from_str(string).ok()
@@ -70,7 +70,7 @@ impl SqlxSession {
     }
 
     /// Used to Set data to SessionData via a Key and the Value to Set.
-    fn set(&self, key: &str, value: impl Serialize) {
+    pub fn set(&self, key: &str, value: impl Serialize) {
         let value = serde_json::to_string(&value).unwrap_or_else(|_| "".to_string());
 
         self.tap(|sess| {
@@ -82,12 +82,12 @@ impl SqlxSession {
     }
 
     ///used to remove a key and its data from SessionData's Hashmap
-    fn remove(&self, key: &str) {
+    pub fn remove(&self, key: &str) {
         self.tap(|sess| sess.data.remove(key));
     }
 
     /// Will instantly clear all data from SessionData's Hashmap
-    fn clear_all(&self) {
+    pub fn clear_all(&self) {
         self.tap(|sess| {
             sess.data.clear();
             let _ = block_on(self.store.clear_store());
@@ -96,7 +96,7 @@ impl SqlxSession {
     }
 
     /// Returns a Count of all Sessions currently within the Session Store.
-    fn count(&self) -> i64 {
+    pub fn count(&self) -> i64 {
         block_on(self.store.count()).unwrap_or(0i64)
     }
 }
