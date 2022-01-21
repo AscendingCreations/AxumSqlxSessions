@@ -27,7 +27,7 @@ serde_json = "1.0"
 chrono = { version = "0.4", features = ["clock", "serde", "std"] }
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
-async-trait = "0.1.51"
+async-trait = "0.1"
 tracing = "0.1"
 http-body = "0.4"
 uuid = { version = "0.8", features = ["v4", "serde"] }
@@ -47,17 +47,7 @@ sqlx = { git = "https://github.com/genusistimelord/sqlx.git", branch = "AnyConne
     "all-types",
 ] }
 thiserror = "1.0"
-either = "1.6.1"
-futures-channel = { version = "0.3.19", default-features = false, features = [
-    "sink",
-    "alloc",
-    "std",
-] }
-futures-core = { version = "0.3.19", default-features = false }
-futures-intrusive = "0.4.0"
 futures-util = { version = "0.3", default-features = false, features = [
     "alloc",
     "sink",
-] }
-# used by the SQLite worker thread to block on the async mutex that locks the database handle
-futures-executor = { version = "0.3.19", optional = true }
+]}
