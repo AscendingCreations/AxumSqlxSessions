@@ -5,5 +5,5 @@
 pub mod databases;
 pub mod sessions;
 
-pub use databases::SqlxDatabasePool;
+pub use databases::{SqlxDatabaseConnection, SqlxDatabasePool};
 pub use sessions::{SessionError, SqlxSession, SqlxSessionConfig, SqlxSessionLayer};
