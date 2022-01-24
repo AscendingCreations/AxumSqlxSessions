@@ -40,3 +40,24 @@ impl SqlxDatabasePool {
         Ok(connection)
     }
 }
+
+#[cfg(feature = "postgres")]
+impl From<PgPool> for SqlxDatabasePool {
+    fn from(conn: PgPool) -> Self {
+        SqlxDatabasePool::Postgres(conn)
+    }
+}
+
+#[cfg(feature = "mysql")]
+impl From<MySqlPool> for SqlxDatabasePool {
+    fn from(conn: MySqlPool) -> Self {
+        SqlxDatabasePool::MySql(conn)
+    }
+}
+
+#[cfg(feature = "sqlite")]
+impl From<SqlitePool> for SqlxDatabasePool {
+    fn from(conn: SqlitePool) -> Self {
+        SqlxDatabasePool::Sqlite(conn)
+    }
+}

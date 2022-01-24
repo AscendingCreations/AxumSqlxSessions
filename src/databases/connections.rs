@@ -1,4 +1,4 @@
-use sqlx::any::{AnyConnection, AnyConnectionKind};
+use sqlx::any::AnyConnection;
 
 #[cfg(feature = "mysql")]
 use sqlx::MySqlConnection;
@@ -21,13 +21,11 @@ impl SqlxDatabaseConnection {
     pub fn inner(self) -> AnyConnection {
         match self {
             #[cfg(feature = "postgres")]
-            SqlxDatabaseConnection::Postgres(conn) => {
-                AnyConnection(AnyConnectionKind::Postgres(conn))
-            }
+            SqlxDatabaseConnection::Postgres(conn) => conn.into(),
             #[cfg(feature = "mysql")]
-            SqlxDatabaseConnection::MySql(conn) => AnyConnection(AnyConnectionKind::MySql(conn)),
+            SqlxDatabaseConnection::MySql(conn) => conn.into(),
             #[cfg(feature = "sqlite")]
-            SqlxDatabaseConnection::Sqlite(conn) => AnyConnection(AnyConnectionKind::Sqlite(conn)),
+            SqlxDatabaseConnection::Sqlite(conn) => conn.into(),
         }
     }
 
