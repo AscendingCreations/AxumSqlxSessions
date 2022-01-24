@@ -92,7 +92,7 @@ impl SqlxSessionStore {
         sqlx::query(&self.substitute_table_name(conn.store_query()))
             .bind(session.id.to_string())
             .bind(&string)
-            .bind(&session.expires)
+            .bind(&session.expires.timestamp())
             .execute(&mut conn.inner())
             .await?;
 
