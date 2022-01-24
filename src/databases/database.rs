@@ -1,11 +1,13 @@
 use crate::{databases::SqlxDatabaseConnection, sessions::SessionError};
 
 #[cfg(feature = "mysql")]
-use sqlx::MySqlPool;
+use sqlx::{MySqlPool, MySql};
 #[cfg(feature = "postgres")]
-use sqlx::PgPool;
+use sqlx::{PgPool, Postgres};
 #[cfg(feature = "sqlite")]
-use sqlx::SqlitePool;
+use sqlx::{SqlitePool, Sqlite};
+
+use sqlx::pool::Pool;
 
 ///This is used to Store one of Sqlx's Pool types so we can derive them to a Any Connection later.
 #[derive(Debug, Clone)]
@@ -57,6 +59,27 @@ impl From<MySqlPool> for SqlxDatabasePool {
 
 #[cfg(feature = "sqlite")]
 impl From<SqlitePool> for SqlxDatabasePool {
+    fn from(conn: SqlitePool) -> Self {
+        SqlxDatabasePool::Sqlite(conn)
+    }
+}
+
+#[cfg(feature = "postgres")]
+impl From<Pool<Postgres>> for SqlxDatabasePool {
+    fn from(conn: PgPool) -> Self {
+        SqlxDatabasePool::Postgres(conn)
+    }
+}
+
+#[cfg(feature = "mysql")]
+impl From<Pool<MySql>> for SqlxDatabasePool {
+    fn from(conn: MySqlPool) -> Self {
+        SqlxDatabasePool::MySql(conn)
+    }
+}
+
+#[cfg(feature = "sqlite")]
+impl From<Pool<Sqlite>> for SqlxDatabasePool {
     fn from(conn: SqlitePool) -> Self {
         SqlxDatabasePool::Sqlite(conn)
     }
