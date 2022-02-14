@@ -33,12 +33,12 @@ http-body = "0.4"
 uuid = { version = "0.8", features = ["v4", "serde"] }
 rand = "0.8"
 http = "0.2"
-parking_lot = "0.11"
+parking_lot = "0.12"
 pin-project-lite = "0.2"
 tower-http = { version = "0.2", features = ["full"] }
 tower-layer = "0.3"
 tower-service = "0.3"
-tower-cookies = "0.4"
+tower-cookies = "0.5"
 sqlx = { git = "https://github.com/genusistimelord/sqlx.git", branch = "FromForAny", features = [
     "runtime-tokio-rustls",
     "chrono",
@@ -50,4 +50,4 @@ thiserror = "1.0"
 futures-util = { version = "0.3", default-features = false, features = [
     "alloc",
     "sink",
-]}
+] }
