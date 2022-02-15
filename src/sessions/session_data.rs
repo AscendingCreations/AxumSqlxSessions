@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 ///This Contains all of out Sessions Data including their Hashed Data they access.
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct SQLxSessionData {
+pub struct SqlxSessionData {
     pub id: Uuid,
     pub data: HashMap<String, String>,
     pub expires: DateTime<Utc>,
@@ -13,7 +13,7 @@ pub struct SQLxSessionData {
     pub destroy: bool,
 }
 
-impl SQLxSessionData {
+impl SqlxSessionData {
     pub fn validate(&self) -> bool {
         self.expires >= Utc::now()
     }

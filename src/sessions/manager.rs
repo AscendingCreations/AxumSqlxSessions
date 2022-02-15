@@ -1,5 +1,6 @@
-use crate::future::ResponseFuture;
-use crate::{SQLxSession, SQLxSessionData, SQLxSessionID, SQLxSessionStore};
+use crate::sessions::{
+    SqlxResponseFuture, SqlxSession, SqlxSessionData, SqlxSessionID, SqlxSessionStore,
+};
 use chrono::{Duration, Utc};
 use futures::executor::block_on;
 use http::{Request, Response};
@@ -11,28 +12,28 @@ use tower_service::Service;
 use uuid::Uuid;
 
 ///This manages the other services that can be seen in inner and gives access to the store.
-/// the store is cloneable hence per each SQLxSession we clone it as we use thread Read write locks
+/// the store is cloneable hence per each SqlxSession we clone it as we use thread Read write locks
 /// to control any data that needs to be accessed across threads that cant be cloned.
 #[derive(Clone, Debug)]
-pub struct SQLxSessionManager<S> {
+pub struct SqlxSessionManager<S> {
     inner: S,
-    store: SQLxSessionStore,
+    store: SqlxSessionStore,
 }
 
-impl<S> SQLxSessionManager<S> {
+impl<S> SqlxSessionManager<S> {
     /// Create a new cookie manager.
-    pub fn new(inner: S, store: SQLxSessionStore) -> Self {
+    pub fn new(inner: S, store: SqlxSessionStore) -> Self {
         Self { inner, store }
     }
 }
 
-impl<ReqBody, ResBody, S> Service<Request<ReqBody>> for SQLxSessionManager<S>
+impl<ReqBody, ResBody, S> Service<Request<ReqBody>> for SqlxSessionManager<S>
 where
     S: Service<Request<ReqBody>, Response = Response<ResBody>>,
 {
     type Response = S::Response;
     type Error = S::Error;
-    type Future = ResponseFuture<S::Future>;
+    type Future = SqlxResponseFuture<S::Future>;
 
     ///lets the system know it is ready for the next step
     #[inline]
@@ -41,7 +42,7 @@ where
     }
 
     /// Is called on Request to generate any needed data and sets a future to be used on the Response
-    /// This is where we will Generate the SQLxSession for the end user and where we add the Cookies.
+    /// This is where we will Generate the SqlxSession for the end user and where we add the Cookies.
     //TODO: Make lifespan Adjustable to be Permenant, Per Session OR Based on a Set Duration from Config.
     fn call(&mut self, mut req: Request<ReqBody>) -> Self::Future {
         let store = self.store.clone();
@@ -51,13 +52,13 @@ where
             .get::<Cookies>()
             .expect("`Tower_Cookie` extension missing");
 
-        let session = SQLxSession {
+        let session = SqlxSession {
             id: {
                 let store_ug = store.inner.upgradable_read();
 
                 let id = if let Some(cookie) = cookies.get(&store.config.cookie_name) {
                     (
-                        SQLxSessionID(
+                        SqlxSessionID(
                             Uuid::parse_str(cookie.value()).expect("`Could not parse Uuid"),
                         ),
                         false,
@@ -71,10 +72,10 @@ where
                         }
                     };
 
-                    (SQLxSessionID(new_id), true)
+                    (SqlxSessionID(new_id), true)
                 };
 
-                if id.1 == false {
+                if !id.1 {
                     if let Some(m) = store_ug.get(&id.0.to_string()) {
                         let mut inner = m.lock();
 
@@ -92,8 +93,8 @@ where
                         let mut sess = block_on(store.load_session(id.0.to_string()))
                             .ok()
                             .flatten()
-                            .unwrap_or(SQLxSessionData {
-                                id: id.0 .0.clone(),
+                            .unwrap_or(SqlxSessionData {
+                                id: id.0 .0,
                                 data: HashMap::new(),
                                 expires: Utc::now() + Duration::hours(6),
                                 destroy: false,
@@ -148,8 +149,8 @@ where
                     cookie.make_permanent();
                     cookies.add(cookie);
 
-                    let sess = SQLxSessionData {
-                        id: id.0 .0.clone(),
+                    let sess = SqlxSessionData {
+                        id: id.0 .0,
                         data: HashMap::new(),
                         expires: Utc::now() + Duration::hours(6),
                         destroy: false,
@@ -161,14 +162,14 @@ where
 
                 id.0
             },
-            store: store.clone(),
+            store,
         };
 
         //Sets a clone of the Store in the Extensions for Direct usage and sets the Session for Direct usage
         req.extensions_mut().insert(self.store.clone());
         req.extensions_mut().insert(session.clone());
 
-        ResponseFuture {
+        SqlxResponseFuture {
             future: self.inner.call(req),
             session,
         }

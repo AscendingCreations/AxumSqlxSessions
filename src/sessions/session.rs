@@ -1,4 +1,4 @@
-use crate::{SQLxSessionData, SQLxSessionID, SQLxSessionStore};
+use crate::sessions::{SqlxSessionData, SqlxSessionID, SqlxSessionStore};
 use axum::{
     async_trait,
     extract::{FromRequest, RequestParts},
@@ -11,15 +11,15 @@ use serde::Serialize;
 ///This is the Session that is generated when a user is routed to a page that Needs one
 /// It is used to Save and load session data similar to how it is done on python.
 #[derive(Debug, Clone)]
-pub struct SQLxSession {
-    pub(crate) store: SQLxSessionStore,
-    pub(crate) id: SQLxSessionID,
+pub struct SqlxSession {
+    pub(crate) store: SqlxSessionStore,
+    pub(crate) id: SqlxSessionID,
 }
 
-/// this auto pulls a SQLxSession from the extensions when added by the Session managers call
+/// this auto pulls a SqlxSession from the extensions when added by the Session managers call
 /// if for some reason the Session Manager did not run this will Error.
 #[async_trait]
-impl<B> FromRequest<B> for SQLxSession
+impl<B> FromRequest<B> for SqlxSession
 where
     B: Send,
 {
@@ -28,20 +28,20 @@ where
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let extensions = req.extensions().ok_or((
             StatusCode::INTERNAL_SERVER_ERROR,
-            "Can't extract SQLxSession: extensions has been taken by another extractor",
+            "Can't extract SqlxSession: extensions has been taken by another extractor",
         ))?;
-        extensions.get::<SQLxSession>().cloned().ok_or((
+        extensions.get::<SqlxSession>().cloned().ok_or((
             StatusCode::INTERNAL_SERVER_ERROR,
-            "Can't extract SQLxSession. Is `SQLxSessionLayer` enabled?",
+            "Can't extract SqlxSession. Is `SqlxSessionLayer` enabled?",
         ))
     }
 }
 
-impl SQLxSession {
+impl SqlxSession {
     ///Runs a Closure that can return Data from the users SessionData Hashmap.
     pub fn tap<T: DeserializeOwned>(
         &self,
-        func: impl FnOnce(&mut SQLxSessionData) -> Option<T>,
+        func: impl FnOnce(&mut SqlxSessionData) -> Option<T>,
     ) -> Option<T> {
         let store_rg = self.store.inner.read();
 

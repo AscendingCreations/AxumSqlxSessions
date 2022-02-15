@@ -35,6 +35,7 @@ impl SqlxSessionConfig {
     /// Set session database pools max connections limit.
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn set_max_connections(mut self, max: u32) -> Self {
         let max = std::cmp::max(max, 1);
         self.max_connections = max;
@@ -44,6 +45,7 @@ impl SqlxSessionConfig {
     /// Set session lifetime (expiration time) within database storage.
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_lifetime(mut self, time: Duration) -> Self {
         self.lifespan = time;
         self
@@ -52,6 +54,7 @@ impl SqlxSessionConfig {
     /// Set session lifetime (expiration time) within Memory storage.
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_memory_lifetime(mut self, time: Duration) -> Self {
         self.memory_lifespan = time;
         self
@@ -60,6 +63,7 @@ impl SqlxSessionConfig {
     /// Set session cookie name
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_cookie_name(mut self, name: &str) -> Self {
         self.cookie_name = name.into();
         self
@@ -68,6 +72,7 @@ impl SqlxSessionConfig {
     /// Set session cookie length
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_cookie_len(mut self, length: usize) -> Self {
         self.cookie_len = length;
         self
@@ -76,6 +81,7 @@ impl SqlxSessionConfig {
     /// Set session cookie path
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_cookie_path(mut self, path: &str) -> Self {
         self.cookie_path = path.into();
         self
@@ -84,6 +90,7 @@ impl SqlxSessionConfig {
     /// Set session database name
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_database(mut self, database: &str) -> Self {
         self.database = database.into();
         self
@@ -92,6 +99,7 @@ impl SqlxSessionConfig {
     /// Set session username
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_username(mut self, username: &str) -> Self {
         self.username = username.into();
         self
@@ -100,6 +108,7 @@ impl SqlxSessionConfig {
     /// Set session user password
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_password(mut self, password: &str) -> Self {
         self.password = password.into();
         self
@@ -108,6 +117,7 @@ impl SqlxSessionConfig {
     /// Set session database table name
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_table_name(mut self, table_name: &str) -> Self {
         self.table_name = table_name.into();
         self
@@ -116,6 +126,7 @@ impl SqlxSessionConfig {
     /// Set session database hostname
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_host(mut self, host: &str) -> Self {
         self.host = host.into();
         self
@@ -124,6 +135,7 @@ impl SqlxSessionConfig {
     /// Set session database port
     ///
     /// Call on the fairing before passing it to `rocket.attach()`
+    #[must_use]
     pub fn with_port(mut self, port: u16) -> Self {
         self.port = port;
         self
